@@ -191,6 +191,136 @@ class BQTable(dsl.Artifact):
         })
 
 
+class ClassificationMetrics(dsl.Metrics):
+  """An artifact representing evaluation Classification Metrics."""
+  TYPE_NAME = 'google.ClassificationMetrics'
+
+  def __init__(self,
+               name: str,
+               uri: str,
+               au_prc: Optional[float] = None,
+               au_roc: Optional[float] = None,
+               log_loss: Optional[float] = None):
+    """Args:
+
+         name: The artifact name.
+         uri: The GCS location where the complete metrics are stored.
+         au_prc: The Area Under Precision-Recall Curve metric. Micro-averaged
+         for the overall evaluation.
+         au_roc: The Area Under Receiver Operating Characteristic curve metric.
+         Micro-averaged for the overall evaluation.
+         log_loss: The Log Loss metric.
+    """
+    super().__init__(uri=uri, name=name)
+    if au_prc is not None:
+      self.log_metric('auPrc', au_prc)
+    if au_roc is not None:
+      self.log_metric('auRoc', au_roc)
+    if log_loss is not None:
+      self.log_metric('logLoss', log_loss)
+
+
+class RegressionMetrics(dsl.Metrics):
+  """An artifact representing evaluation Regression Metrics."""
+  TYPE_NAME = 'google.RegressionMetrics'
+
+  def __init__(self,
+               name: str,
+               uri: str,
+               root_mean_squared_error: Optional[float] = None,
+               mean_absolute_error: Optional[float] = None,
+               mean_absolute_percentage_error: Optional[float] = None,
+               r_squared: Optional[float] = None,
+               root_mean_squared_log_error: Optional[float] = None):
+    """Args:
+
+         name: The artifact name.
+         uri: The GCS location where the complete metrics are stored.
+         root_mean_squared_error: Root Mean Squared Error (RMSE).
+         mean_absolute_error: Mean Absolute Error (MAE).
+         mean_absolute_percentage_error: Mean absolute percentage error.
+         Infinity when there are zeros in the ground truth.
+         r_squared: Coefficient of determination as Pearson correlation
+         coefficient. Undefined when ground truth or predictions are constant or
+         near constant.
+         root_mean_squared_log_error: Root mean squared log error. Undefined
+         when there are negative ground truth values or predictions.
+    """
+    super().__init__(uri=uri, name=name)
+    if root_mean_squared_error is not None:
+      self.log_metric('rootMeanSquaredError', root_mean_squared_error)
+    if mean_absolute_error is not None:
+      self.log_metric('meanAbsoluteError', mean_absolute_error)
+    if mean_absolute_percentage_error is not None:
+      self.log_metric('meanAbsolutePercentageError',
+                      mean_absolute_percentage_error)
+    if r_squared is not None:
+      self.log_metric('rSquared', r_squared)
+    if root_mean_squared_log_error is not None:
+      self.log_metric('rootMeanSquaredLogError', root_mean_squared_log_error)
+
+
+class ForecastingMetrics(dsl.Metrics):
+  """An artifact representing evaluation Forecasting Metrics."""
+  TYPE_NAME = 'google.ForecastingMetrics'
+
+  def __init__(
+      self,
+      name: str,
+      uri: str,
+      root_mean_squared_error: Optional[float] = None,
+      mean_absolute_error: Optional[float] = None,
+      mean_absolute_percentage_error: Optional[float] = None,
+      r_squared: Optional[float] = None,
+      root_mean_squared_log_error: Optional[float] = None,
+      weighted_absolute_percentage_error: Optional[float] = None,
+      root_mean_squared_percentage_error: Optional[float] = None,
+      symmetric_mean_absolute_percentage_error: Optional[float] = None):
+    """Args:
+
+         name: The artifact name.
+         uri: The GCS location where the complete metrics are stored.
+         root_mean_squared_error: Root Mean Squared Error (RMSE).
+         mean_absolute_error: Mean Absolute Error (MAE).
+         mean_absolute_percentage_error: Mean absolute percentage error.
+         Infinity when there are zeros in the ground truth.
+         r_squared: Coefficient of determination as Pearson correlation
+         coefficient. Undefined when ground truth or predictions are constant or
+         near constant.
+         root_mean_squared_log_error: Root mean squared log error. Undefined
+         when there are negative ground truth values or predictions.
+         weighted_absolute_percentage_error: Weighted Absolute Percentage Error.
+         Does not use weights, this is just what the metric is called. Undefined
+         if actual values sum to zero. Will be very large if actual values sum
+         to a very small number.
+         root_mean_squared_percentage_error: Root Mean Square Percentage Error.
+         Square root of MSPE. Undefined/imaginary when MSPE is negative.
+         symmetric_mean_absolute_percentage_error: Symmetric Mean Absolute
+         Percentage Error.
+    """
+    super().__init__(uri=uri, name=name)
+    if root_mean_squared_error is not None:
+      self.log_metric('rootMeanSquaredError', root_mean_squared_error)
+    if mean_absolute_error is not None:
+      self.log_metric('meanAbsoluteError', mean_absolute_error)
+    if mean_absolute_percentage_error is not None:
+      self.log_metric('meanAbsolutePercentageError',
+                      mean_absolute_percentage_error)
+    if r_squared is not None:
+      self.log_metric('rSquared', r_squared)
+    if root_mean_squared_log_error is not None:
+      self.log_metric('rootMeanSquaredLogError', root_mean_squared_log_error)
+    if weighted_absolute_percentage_error is not None:
+      self.log_metric('weightedAbsolutePercentageError',
+                      weighted_absolute_percentage_error)
+    if root_mean_squared_percentage_error is not None:
+      self.log_metric('rootMeanSquaredPercentageError',
+                      root_mean_squared_percentage_error)
+    if symmetric_mean_absolute_percentage_error is not None:
+      self.log_metric('symmetricMeanAbsolutePercentageError',
+                      symmetric_mean_absolute_percentage_error)
+
+
 class UnmanagedContainerModel(dsl.Artifact):
   """An artifact representing an unmanaged container model."""
   TYPE_NAME = 'google.UnmanagedContainerModel'
