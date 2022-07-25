@@ -53,6 +53,21 @@ parser.add_argument(
     required=True,
     default=argparse.SUPPRESS)
 parser.add_argument(
+    '--classification_metrics',
+    dest='classification_metrics',
+    type=str,
+    default=None)
+parser.add_argument(
+    '--forecasting_metrics',
+    dest='forecasting_metrics',
+    type=str,
+    default=None)
+parser.add_argument(
+    '--regression_metrics',
+    dest='regression_metrics',
+    type=str,
+    default=None)
+parser.add_argument(
     '--metrics_explanation', dest='metrics_explanation', type=str, default=None)
 parser.add_argument('--explanation', dest='explanation', type=str, default=None)
 parser.add_argument(
@@ -90,7 +105,19 @@ def main(argv):
   api_endpoint = location + '-aiplatform.googleapis.com'
   resource_uri_prefix = f'https://{api_endpoint}/v1/'
 
-  with open(parsed_args.metrics) as metrics_file:
+  if parsed_args.classification_metrics:
+    metrics_file_path = parsed_args.classification_metrics
+    problem_type = 'classification'
+  elif parsed_args.forecasting_metrics:
+    metrics_file_path = parsed_args.forecasting_metrics
+    problem_type = 'forecasting'
+  elif parsed_args.regression_metrics:
+    metrics_file_path = parsed_args.regression_metrics
+    problem_type = 'regression'
+  else:
+    metrics_file_path = parsed_args.metrics
+
+  with open(metrics_file_path) as metrics_file:
     model_evaluation = {
         'metrics':
             to_value(
@@ -99,7 +126,7 @@ def main(argv):
                         json.loads(metrics_file.read())['slicedMetrics'][0]
                         ['metrics'].values()))),
         'metrics_schema_uri':
-            PROBLEM_TYPE_TO_SCHEMA_URI.get(parsed_args.problem_type),
+            PROBLEM_TYPE_TO_SCHEMA_URI.get(problem_type),
     }
 
   if parsed_args.explanation and parsed_args.explanation == "{{$.inputs.artifacts['explanation'].metadata['explanation_gcs_path']}}":
