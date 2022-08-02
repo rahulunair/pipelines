@@ -21,9 +21,9 @@ import time
 import google.auth
 import google.auth.transport.requests
 
-from ...utils import execution_context
-from .utils import json_util
-from .utils import artifact_util
+from google_cloud_pipeline_components.container.utils import execution_context
+from google_cloud_pipeline_components.container.v1.gcp_launcher.utils import json_util
+from google_cloud_pipeline_components.container.v1.gcp_launcher.utils import artifact_util
 from google.cloud import bigquery
 from google.protobuf import json_format
 from google_cloud_pipeline_components.proto.gcp_resources_pb2 import GcpResources
@@ -1110,8 +1110,8 @@ def bigquery_explain_predict_model_job(
         https://cloud.google.com/bigquery-ml/docs/reference/standard-sql/bigqueryml-syntax-explain-predict#threshold
       num_integral_steps: This argument specifies the number of steps to sample
         between the example being explained and its baseline for approximating
-        the integral in integrated gradients attribution methods.
-        For more details, see
+        the integral in integrated gradients attribution methods. For more
+        details, see
         https://cloud.google.com/bigquery-ml/docs/reference/standard-sql/bigqueryml-syntax-explain-predict#num_integral_steps
       payload: A json serialized Job proto. For more details, see
         https://cloud.google.com/bigquery/docs/reference/rest/v2/Job
@@ -1120,8 +1120,6 @@ def bigquery_explain_predict_model_job(
         https://cloud.google.com/bigquery/docs/reference/rest/v2/Job#JobConfigurationQuery
       gcp_resources: File path for storing `gcp_resources` output parameter.
       executor_input: A json serialized pipeline executor input.
-
-
   """
   if not (not query_statement) ^ (not table_name):
     raise ValueError(
@@ -1139,7 +1137,7 @@ def bigquery_explain_predict_model_job(
 
   if num_integral_steps is not None and num_integral_steps > 0:
     settings_field_sql_list.append('%s AS num_integral_steps' %
-                                  num_integral_steps)
+                                   num_integral_steps)
 
   settings_field_sql = ','.join(settings_field_sql_list)
   settings_sql = ', STRUCT(%s)' % settings_field_sql
@@ -1806,8 +1804,9 @@ def bigquery_ml_global_explain_job(
   """
   job_configuration_query_override_json = json.loads(
       job_configuration_query_override, strict=False)
-  job_configuration_query_override_json[
-      'query'] = 'SELECT * FROM ML.GLOBAL_EXPLAIN(MODEL %s, STRUCT(TRUE AS class_level_explain))' % (
+  job_configuration_query_override_json['query'] = (
+      'SELECT * FROM ML.GLOBAL_EXPLAIN(MODEL %s, STRUCT(TRUE AS '
+      'class_level_explain))') % (
           _back_quoted_if_needed(model_name))
   return bigquery_query_job(type, project, location, payload,
                             json.dumps(job_configuration_query_override_json),
@@ -2099,3 +2098,59 @@ def bigquery_detect_anomalies_model_job(
   return bigquery_query_job(type, project, location, payload,
                             json.dumps(job_configuration_query_override_json),
                             gcp_resources, executor_input)
+
+
+JOB_TYPE_TO_ACTION_MAP = {
+    'BigqueryQueryJob':
+        bigquery_query_job,
+    'BigqueryCreateModelJob':
+        bigquery_create_model_job,
+    'BigqueryDropModelJob':
+        bigquery_drop_model_job,
+    'BigqueryPredictModelJob':
+        bigquery_predict_model_job,
+    'BigqueryMLForecastJob':
+        bigquery_forecast_model_job,
+    'BigqueryExplainPredictModelJob':
+        bigquery_explain_predict_model_job,
+    'BigqueryExplainForecastModelJob':
+        bigquery_explain_forecast_model_job,
+    'BigqueryExportModelJob':
+        bigquery_export_model_job,
+    'BigqueryEvaluateModelJob':
+        bigquery_evaluate_model_job,
+    'BigqueryMLArimaCoefficientsJob':
+        bigquery_ml_arima_coefficients,
+    'BigqueryMLArimaEvaluateJob':
+        bigquery_ml_arima_evaluate_job,
+    'BigqueryMLCentroidsJob':
+        bigquery_ml_centroids_job,
+    'BigqueryMLWeightsJob':
+        bigquery_ml_weights_job,
+    'BigqueryMLReconstructionLossJob':
+        bigquery_ml_reconstruction_loss_job,
+    'BigqueryMLTrialInfoJob':
+        bigquery_ml_trial_info_job,
+    'BigqueryMLTrainingInfoJob':
+        bigquery_ml_training_info_job,
+    'BigqueryMLAdvancedWeightsJob':
+        bigquery_ml_advanced_weights_job,
+    'BigqueryMLConfusionMatrixJob':
+        bigquery_ml_confusion_matrix_job,
+    'BigqueryMLFeatureInfoJob':
+        bigquery_ml_feature_info_job,
+    'BigqueryMLRocCurveJob':
+        bigquery_ml_roc_curve_job,
+    'BigqueryMLPrincipalComponentsJob':
+        bigquery_ml_principal_components_job,
+    'BigqueryMLPrincipalComponentInfoJob':
+        bigquery_ml_principal_component_info_job,
+    'BigqueryMLFeatureImportanceJob':
+        bigquery_ml_feature_importance_job,
+    'BigqueryMLRecommendJob':
+        bigquery_ml_recommend_job,
+    'BigqueryMLGlobalExplainJob':
+        bigquery_ml_global_explain_job,
+    'BigqueryDetectAnomaliesModelJob':
+        bigquery_detect_anomalies_model_job,
+}
